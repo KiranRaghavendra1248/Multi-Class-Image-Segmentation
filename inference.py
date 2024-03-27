@@ -19,6 +19,7 @@ from collections import defaultdict
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
+import torch.quantization
 
 from models import *
 from utils import *
@@ -35,19 +36,23 @@ print('Running on: ',device)
 # Instantiate model
 model = VanillaUNet(in_channels=3,num_classes=11)
 load_checkpoint(weights_path,model)
-model.eval()
+quantized_model = torch.quantization.quantize_dynamic(
+    model, {nn.Conv2d, nn.Linear, nn.ConvTranspose2d, nn.ReLU, nn.BatchNorm2d}, dtype=torch.qint8
+)
+quantized_model.eval()
 
 # Define transform
 transform = transforms.Compose([
     transforms.ToPILImage(),                # Convert numpy array to PIL Image
     transforms.Resize((512, 512)),          # Resize to match the input size of your CNN
     transforms.ToTensor(),                   # Convert PIL Image to tensor
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
 # Infinite Face Detection Loop
 v_cap = cv2.VideoCapture(0)
-v_cap.set(cv2.CAP_PROP_FRAME_WIDTH, image_size)
-v_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, image_size)
+v_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 256)
+v_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 256)
 # Check if the webcam is opened successfully
 if not v_cap.isOpened():
     print("Error: Could not open webcam.")
@@ -61,7 +66,7 @@ while(True):
     input_tensor = transform(frame).unsqueeze(0)
     # Perform inference
     with torch.no_grad():
-        output = model(input_tensor)
+        output = quantized_model(input_tensor)
 
     segmented_masks = generate_segmentation_masks(output)
     segmented_image = generate_image_from_masks(segmented_masks)
