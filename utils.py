@@ -24,11 +24,12 @@ def save_checkpoint(state,filename='weights.pth.tar'):
     torch.save(state,filename)
 
 # Load checkpoint
-def load_checkpoint(filename,model,optim):
+def load_checkpoint(filename,model,optim=None):
     print('Loading weights-->')
-    checkpoint = torch.load(filename)
+    checkpoint = torch.load(filename,map_location=torch.device('cpu'))
     model.load_state_dict(checkpoint['state_dict'])
-    optim.load_state_dict(checkpoint['optimizer'])
+    if optim!=None:
+        optim.load_state_dict(checkpoint['optimizer'])
 
 
 # We need to generate 1 single mask from all masks
@@ -56,8 +57,9 @@ def retrive_masks(image_path, mask_dir,change_extension=True,categories=default_
     return mask_paths
 
 
-def generate_image_from_masks(masks,original_image):
+def generate_image_from_masks(masks,original_image=None):
     colors = [
+        (0, 0, 0),    # Black is class 0
         (255, 0, 0),  # Red
         (0, 255, 0),  # Green
         (0, 0, 255),  # Blue
@@ -67,9 +69,12 @@ def generate_image_from_masks(masks,original_image):
         (255, 165, 0),  # Orange
         (128, 0, 128),  # Purple
         (0, 128, 128),  # Teal
-        (128, 0, 0)  # Maroon
+        (128, 0, 0),  # Maroon
     ]
-    height, width = original_image.shape[:2]
+    if original_image:
+        height, width = original_image.shape[:2]
+    else:
+        height, width = 512, 512
     composite_image = np.zeros((height, width, 3),dtype=np.uint8)
     # Overlay each mask on the composite image with its respective color
     for i, mask in enumerate(masks):
@@ -126,6 +131,16 @@ def get_train_test_datasets(dataset):
     train_dataset, test_dataset = random_split(dataset, [num_train, num_test])
 
     return train_dataset, test_dataset
+
+def generate_segmentation_masks(output):
+    segmented_masks = []
+    for class_idx in range(output.size(1)):  # Iterate over the channels dimension
+        # Extract the segmented mask for the current class
+        segmented_mask = (output[:, class_idx, :, :] == output.max(dim=1)[0]).cpu().numpy() * 255
+        segmented_mask = segmented_mask.squeeze(0)
+        # Append the segmented mask to the list
+        segmented_masks.append(segmented_mask)
+    return segmented_masks
 
 
 def train_loop(model, dataloader, loss_fun, optimizer, device, scheduler, num_epochs):
