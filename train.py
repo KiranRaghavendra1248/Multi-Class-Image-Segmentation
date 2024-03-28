@@ -50,8 +50,8 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 model = VanillaUNet(in_channels=3,num_classes=11)
 
 # Define Criterion, Loss function, LR Scheduler
-criterion = nn.CrossEntropyLoss(ignore_index=0)
-optimizer = optim.Adam(model.parameters(), lr=0.0001, betas=(0.9, 0.98), eps=1e-9)
+criterion = nn.CrossEntropyLoss(weight = torch.tensor([0.0011, 0.0014, 0.0920, 0.1935, 0.0798, 0.2451, 0.0226, 0.0838, 0.1801,0.0989, 0.0017],dtype = torch.float32).to(device))
+optimizer = optim.Adam(model.parameters(), lr=learning_rate, betas=(0.9, 0.98), eps=1e-9)
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10, eta_min=0)
 
 train_loop(model,train_loader,criterion,optimizer,device, scheduler, num_epochs)

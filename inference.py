@@ -36,17 +36,14 @@ print('Running on: ',device)
 # Instantiate model
 model = VanillaUNet(in_channels=3,num_classes=11)
 load_checkpoint(weights_path,model)
-quantized_model = torch.quantization.quantize_dynamic(
-    model, {nn.Conv2d, nn.Linear, nn.ConvTranspose2d, nn.ReLU, nn.BatchNorm2d}, dtype=torch.qint8
-)
-quantized_model.eval()
+model.eval()
 
 # Define transform
 transform = transforms.Compose([
     transforms.ToPILImage(),                # Convert numpy array to PIL Image
     transforms.Resize((512, 512)),          # Resize to match the input size of your CNN
     transforms.ToTensor(),                   # Convert PIL Image to tensor
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
 # Infinite Face Detection Loop
@@ -66,22 +63,26 @@ while(True):
     input_tensor = transform(frame).unsqueeze(0)
     # Perform inference
     with torch.no_grad():
-        output = quantized_model(input_tensor)
-
-    segmented_masks = generate_segmentation_masks(output)
-    segmented_image = generate_image_from_masks(segmented_masks)
-    segmented_image = cv2.resize(segmented_image,(frame.shape[1],frame.shape[0]))
-
+        output = model(input_tensor)
+    segmented_image = create_image_from_output(output)
     # Concatenate the original frame and segmented image horizontally
-    combined_frame = cv2.hconcat([frame, segmented_image])
     # Display the combined frame in a window
-    cv2.imshow('Original vs Segmented',combined_frame)
+    cv2.imshow('Segmented',segmented_image)
 
     if cv2.waitKey(delay) & 0xFF==ord('q'):
         break
 
 v_cap.release()
 cv2.destroyAllWindows()
+
+# Process single image
+# img_file = "trial_image.jpg"
+# img = cv2.imread(img_file)
+# input_tensor = transform(img).unsqueeze(0)
+# with torch.no_grad():
+#     output = model(input_tensor)
+# segmented_image = create_image_from_output(output)
+# cv2.imwrite("result.png",segmented_image)
 
 
 

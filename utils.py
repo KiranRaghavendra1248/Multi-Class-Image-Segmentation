@@ -56,9 +56,7 @@ def retrive_masks(image_path, mask_dir,change_extension=True,categories=default_
             mask_paths.append(os.path.join(mask_dir,new_mask_name))
     return mask_paths
 
-
-def generate_image_from_masks(masks,original_image=None):
-    colors = [
+colors = [
         (0, 0, 0),    # Black is class 0
         (255, 0, 0),  # Red
         (0, 255, 0),  # Green
@@ -71,6 +69,8 @@ def generate_image_from_masks(masks,original_image=None):
         (0, 128, 128),  # Teal
         (128, 0, 0),  # Maroon
     ]
+
+def generate_image_from_masks(masks,original_image=None):
     if original_image:
         height, width = original_image.shape[:2]
     else:
@@ -132,15 +132,19 @@ def get_train_test_datasets(dataset):
 
     return train_dataset, test_dataset
 
-def generate_segmentation_masks(output):
-    segmented_masks = []
-    for class_idx in range(output.size(1)):  # Iterate over the channels dimension
-        # Extract the segmented mask for the current class
-        segmented_mask = (output[:, class_idx, :, :] == output.max(dim=1)[0]).cpu().numpy() * 255
-        segmented_mask = segmented_mask.squeeze(0)
-        # Append the segmented mask to the list
-        segmented_masks.append(segmented_mask)
-    return segmented_masks
+def create_image_from_output(output):
+    _,indices = torch.max(output,dim=1)
+    image_output = torch.zeros((output.shape[0],3,output.shape[2],output.shape[3]))
+    h,w = output.shape[2],output.shape[3]
+    result = []
+    for a in range(h):
+        for b in range(w):
+            class_index = indices[0][a][b].int()
+            result.append(colors[class_index])
+    result = np.reshape(result, (h,w,3))
+    return result
+
+
 
 
 def train_loop(model, dataloader, loss_fun, optimizer, device, scheduler, num_epochs):

@@ -20,6 +20,7 @@ import cv2
 
 
 # Define segmentation architectures
+# Define segmentation architectures
 class VanillaUNet(nn.Module):
     def __init__(self, in_channels=3,num_classes=11):
         super(VanillaUNet, self).__init__()
@@ -43,14 +44,14 @@ class VanillaUNet(nn.Module):
         # Max pool
         self.max_pool = nn.MaxPool2d(kernel_size=2, stride=2)
 
-    def _double_conv(self, in_channels,
-                     out_channels):
+    def _double_conv(self, in_channels,out_channels):
         conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels,kernel_size=3, padding=1,bias=False),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels,kernel_size=3, padding=1),
-            nn.ReLU(inplace=True)
+            nn.BatchNorm2d(out_channels),
+            nn.LeakyReLU(inplace=True)
         )
         return conv
 
@@ -91,4 +92,4 @@ class VanillaUNet(nn.Module):
         # Final Conv Layer
         X22 = self.final_conv(X21)  # X22 Shape : [B X num_classes X 512 X 512]
 
-        return X22
+        return F.softmax(X22, dim=1)
