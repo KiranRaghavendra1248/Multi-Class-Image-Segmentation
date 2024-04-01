@@ -84,38 +84,6 @@ def generate_image_from_masks(masks,original_image=None):
     return composite_image
 
 
-class CelebAMask(Dataset):
-    def __init__(self, images_dir, masks_dir,transform=None):
-        self.images_dir = images_dir
-        self.masks_dir = masks_dir
-        self.transform = transform
-        self.image_files = os.listdir(images_dir)
-
-    def __len__(self):
-        return len(self.image_files)
-
-    def __getitem__(self, index):
-        img_path = os.path.join(self.images_dir,self.image_files[index])
-        mask_paths = retrive_masks(img_path,self.masks_dir)
-        # Open image
-        image = Image.open(img_path)
-        # Open masks - create 1 mask or N masks???? 1 mask for ground truth and N masks from CNN seems like a better design choice
-        masks = []
-        for mask_path in mask_paths:
-            if os.path.exists(mask_path):
-                mask_img = cv2.imread(mask_path,cv2.IMREAD_GRAYSCALE)
-                masks.append(mask_img)
-            else:
-                masks.append(np.zeros((512, 512)))
-        composite_image = np.zeros((512, 512),dtype=np.uint8)
-        # Assign unique labels to the pixels in the combined mask
-        for i, mask in enumerate(masks, start=1):
-            mask_color = np.zeros((512, 512),dtype=np.uint8)
-            mask_color[mask == 255] = i
-            # Update composite image only where it hasn't been modified yet
-            composite_image[np.where((mask_color != 0) & (composite_image == 0))] = mask_color[np.where((mask_color != 0) & (composite_image == 0))]
-        return self.transform(image), torch.tensor(composite_image)
-
 # Create train and val datasets
 def get_train_test_datasets(dataset):
     train_size = 0.8

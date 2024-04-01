@@ -77,14 +77,14 @@ transform = transforms.Compose([
 # cv2.destroyAllWindows()
 
 # Process single image
-img_file = "trial_images/img1.jpg"
+img_file = "trial_images/img3.jpg"
 img = cv2.imread(img_file)
 input_tensor = transform(img).unsqueeze(0)
 with torch.no_grad():
     output = model(input_tensor)
 segmented_image = create_image_from_output(output)
 segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
-cv2.imwrite("results/img1.png",segmented_image)
+cv2.imwrite("results/img3.png",segmented_image)
 
 
 
