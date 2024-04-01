@@ -45,44 +45,46 @@ transform = transforms.Compose([
     transforms.ToTensor(),                   # Convert PIL Image to tensor
      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
-
-# Infinite Face Detection Loop
-v_cap = cv2.VideoCapture(0)
-v_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 256)
-v_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 256)
-# Check if the webcam is opened successfully
-if not v_cap.isOpened():
-    print("Error: Could not open webcam.")
-    exit()
-start = time.time()
-prev = 0
-while(True):
-    time_elapsed = time.time()-prev
-    ret,frame = v_cap.read()
-    # Preprocess the frame
-    input_tensor = transform(frame).unsqueeze(0)
-    # Perform inference
-    with torch.no_grad():
-        output = model(input_tensor)
-    segmented_image = create_image_from_output(output)
-    # Concatenate the original frame and segmented image horizontally
-    # Display the combined frame in a window
-    cv2.imshow('Segmented',segmented_image)
-
-    if cv2.waitKey(delay) & 0xFF==ord('q'):
-        break
-
-v_cap.release()
-cv2.destroyAllWindows()
+#
+# # Infinite Face Detection Loop
+# v_cap = cv2.VideoCapture(0)
+# v_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 256)
+# v_cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 256)
+# # Check if the webcam is opened successfully
+# if not v_cap.isOpened():
+#     print("Error: Could not open webcam.")
+#     exit()
+# start = time.time()
+# prev = 0
+# while(True):
+#     time_elapsed = time.time()-prev
+#     ret,frame = v_cap.read()
+#     # Preprocess the frame
+#     input_tensor = transform(frame).unsqueeze(0)
+#     # Perform inference
+#     with torch.no_grad():
+#         output = model(input_tensor)
+#     segmented_image = create_image_from_output(output)
+#     segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
+#     # Concatenate the original frame and segmented image horizontally
+#     # Display the combined frame in a window
+#     cv2.imshow('Segmented',segmented_image)
+#
+#     if cv2.waitKey(delay) & 0xFF==ord('q'):
+#         break
+#
+# v_cap.release()
+# cv2.destroyAllWindows()
 
 # Process single image
-# img_file = "trial_image.jpg"
-# img = cv2.imread(img_file)
-# input_tensor = transform(img).unsqueeze(0)
-# with torch.no_grad():
-#     output = model(input_tensor)
-# segmented_image = create_image_from_output(output)
-# cv2.imwrite("result.png",segmented_image)
+img_file = "trial_images/img3.jpg"
+img = cv2.imread(img_file)
+input_tensor = transform(img).unsqueeze(0)
+with torch.no_grad():
+    output = model(input_tensor)
+segmented_image = create_image_from_output(output)
+segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
+cv2.imwrite("results/img3.png",segmented_image)
 
 
 

@@ -57,18 +57,17 @@ def retrive_masks(image_path, mask_dir,change_extension=True,categories=default_
     return mask_paths
 
 colors = [
-        (0, 0, 0),    # Black is class 0
-        (255, 0, 0),  # Red
-        (0, 255, 0),  # Green
-        (0, 0, 255),  # Blue
-        (255, 255, 0),  # Yellow
-        (0, 255, 255),  # Cyan
-        (255, 0, 255),  # Magenta
-        (255, 165, 0),  # Orange
-        (128, 0, 128),  # Purple
-        (0, 128, 128),  # Teal
-        (128, 0, 0),  # Maroon
-    ]
+    [0, 0, 0],
+    [0, 153, 255],
+    [102, 255, 153],
+    [0, 204, 153],
+    [255, 255, 102],
+    [255, 255, 204],
+    [255, 153, 0],
+    [255, 102, 255],
+    [102, 0, 51],
+    [255, 204, 255],
+    [255, 0, 102]]
 
 def generate_image_from_masks(masks,original_image=None):
     if original_image:
@@ -141,7 +140,7 @@ def create_image_from_output(output):
         for b in range(w):
             class_index = indices[0][a][b].int()
             result.append(colors[class_index])
-    result = np.reshape(result, (h,w,3))
+    result = np.reshape(result, (h,w,3)).astype(dtype=np.uint8)
     return result
 
 
