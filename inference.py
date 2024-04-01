@@ -36,7 +36,10 @@ print('Running on: ',device)
 # Instantiate model
 model = VanillaUNet(in_channels=3,num_classes=11)
 load_checkpoint(weights_path,model)
-model.eval()
+quantized_model = torch.quantization.quantize_dynamic(
+    model, {nn.Conv2d, nn.Linear, nn.ConvTranspose2d, nn.ReLU, nn.BatchNorm2d}, dtype=torch.qint8
+)
+quantized_model.eval()
 
 # Define transform
 transform = transforms.Compose([
@@ -64,7 +67,7 @@ while(True):
         input_tensor = transform(frame).unsqueeze(0)
         # Perform inference
         with torch.no_grad():
-            output = model(input_tensor)
+            output = quantized_model(input_tensor)
         segmented_image = create_image_from_output(output)
         segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
         segmented_image = cv2.resize(segmented_image,(frame.shape[1],frame.shape[0]))
