@@ -45,7 +45,7 @@ transform = transforms.Compose([
     transforms.ToTensor(),                   # Convert PIL Image to tensor
      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
-#
+
 # # Infinite Face Detection Loop
 # v_cap = cv2.VideoCapture(0)
 # v_cap.set(cv2.CAP_PROP_FRAME_WIDTH, 256)
@@ -77,14 +77,14 @@ transform = transforms.Compose([
 # cv2.destroyAllWindows()
 
 # Process single image
-img_file = "trial_images/img3.jpg"
+img_file = "trial_images/img1.jpg"
 img = cv2.imread(img_file)
 input_tensor = transform(img).unsqueeze(0)
 with torch.no_grad():
     output = model(input_tensor)
 segmented_image = create_image_from_output(output)
 segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
-cv2.imwrite("results/img3.png",segmented_image)
+cv2.imwrite("results/img1.png",segmented_image)
 
 
 
