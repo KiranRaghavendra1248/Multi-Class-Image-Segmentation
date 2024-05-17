@@ -91,7 +91,7 @@ cv2.destroyAllWindows()
 #     output = model(input_tensor)
 # segmented_image = create_image_from_output(output)
 # segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_RGB2BGR)
-# cv2.imwrite("results/img3.png",segmented_image)
+# cv2.imwrite("results_unet_20epochs/img3.png",segmented_image)
 
 
 
