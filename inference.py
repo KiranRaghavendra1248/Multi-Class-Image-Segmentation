@@ -24,7 +24,7 @@ import torch.quantization
 from models import *
 from utils import *
 
-weights_path = "weights.pth.tar"
+weights_path = "drsunet_weights.pth.tar"
 
 # Params
 desired_fps = 10
@@ -34,7 +34,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print('Running on: ',device)
 
 # Instantiate model
-model = VanillaUNet(in_channels=3,num_classes=11)
+model = DRSUNet(in_channels=3,num_classes=11)
 load_checkpoint(weights_path,model)
 quantized_model = torch.quantization.quantize_dynamic(
     model, {nn.Conv2d, nn.Linear, nn.ConvTranspose2d, nn.ReLU, nn.BatchNorm2d}, dtype=torch.qint8

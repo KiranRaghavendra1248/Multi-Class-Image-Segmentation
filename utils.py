@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import cv2
 
 # Save checkpoint
-def save_checkpoint(state,filename='weights.pth.tar'):
+def save_checkpoint(state,filename='vanilla_unet_weights.pth.tar'):
     print('Saving weights-->')
     torch.save(state,filename)
 
