@@ -1,4 +1,6 @@
 # Multi-Class-Image-Segmentation
+![](https://github.com/KiranRaghavendra1248/Multi-Class-Image-Segmentation/blob/dev/Demo.gif)
+
 <ul>
   <li>Performed Multi Class Semantic Segmentation on Human Face Dataset(Lapa Dataset)</li>
   <li>Implemented UNet and Depth Residual Seperable UNet Architecture from the research paper and compared performance</li> 
